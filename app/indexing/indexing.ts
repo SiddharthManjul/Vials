@@ -1,3 +1,4 @@
+// app/Indexing/indexer.ts
 import {
   HypersyncClient,
   Decoder,
@@ -8,15 +9,12 @@ import {
   hasIndexedToAndFromTopics,
   holdDispalyThreshold,
   hyperSyncEndpoint,
-  targetContract,
 } from "./config";
 
 const transferEventSigHash =
-  "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"; // ERC721 Transfer event signature
+  "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"; // ERC721 Transfer
 
-async function main() {
-  console.time("Script Execution Time");
-
+export async function fetchNFTInteractions(targetContract: string) {
   const client = HypersyncClient.new({ url: hyperSyncEndpoint });
 
   const query = {
@@ -39,33 +37,25 @@ async function main() {
     },
   };
 
-  console.log("Running the query...");
-
   const receiver = await client.streamEvents(query, {});
-
   const decoder = Decoder.fromSignatures([
     hasIndexedToAndFromTopics
       ? "Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
       : "Transfer(address from, address to, uint256 tokenId)",
   ]);
 
-  const nftInteractions: {
-    [address: string]: {
+  const nftInteractions: Record<
+    string,
+    {
       tokenIds: Set<bigint>;
       transfersIn: number;
       transfersOut: number;
-    };
-  } = {};
+    }
+  > = {};
 
-  let totalTransfers = 0;
   while (true) {
     const res = await receiver.recv();
     if (res === null) break;
-
-    totalTransfers += res.data.length;
-    console.log(
-      `scanned up to block: ${res.nextBlock}, total transfers: ${totalTransfers}`
-    );
 
     const decodedLogs = await decoder.decodeEvents(res.data);
 
@@ -112,29 +102,16 @@ async function main() {
 
       nftInteractions[to].tokenIds.add(tokenId);
       nftInteractions[to].transfersIn += 1;
-
-      // console.log(`From: ${from}, To: ${to}, Token ID: ${tokenId}`);
     }
   }
 
-  console.log("Summary of addresses owning more than 10 tokens:");
-  for (const [address, interaction] of Object.entries(nftInteractions)) {
-    console.log(
-      `Address: ${address}, Token IDs: ${Array.from(interaction.tokenIds).join(
-        ", "
-      )}`
-    );
-    if (interaction.tokenIds.size > holdDispalyThreshold) {
-      console.log(`Address: ${address}`);
-      console.log(
-        `  Token IDs: ${Array.from(interaction.tokenIds).join(", ")}`
-      );
-      console.log(`  Total Transfers In: ${interaction.transfersIn}`);
-      console.log(`  Total Transfers Out: ${interaction.transfersOut}`);
-    }
-  }
+  // Convert sets to arrays for serialization
+  const result = Object.entries(nftInteractions).map(([address, data]) => ({
+    address,
+    tokenIds: Array.from(data.tokenIds),
+    transfersIn: data.transfersIn,
+    transfersOut: data.transfersOut,
+  }));
 
-  console.timeEnd("Script Execution Time");
+  return result.filter((entry) => entry.tokenIds.length > holdDispalyThreshold);
 }
-
-main();
