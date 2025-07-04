@@ -1999,8 +1999,8 @@ packages:
     peerDependencies:
       zod: ^3.24.1
 
-  zod@3.25.73:
-    resolution: {integrity: sha512-fuIKbQAWQl22Ba5d1quwEETQYjqnpKVyZIWAhbnnHgnDd3a+z4YgEfkI5SZ2xMELnLAXo/Flk2uXgysZNf0uaA==}
+  zod@3.25.74:
+    resolution: {integrity: sha512-J8poo92VuhKjNknViHRAIuuN6li/EwFbAC8OedzI8uxpEPGiXHGQu9wemIAioIpqgfB4SySaJhdk0mH5Y4ICBg==}
 
 snapshots:
 
@@ -2106,8 +2106,8 @@ snapshots:
     dependencies:
       google-auth-library: 9.15.1
       ws: 8.18.3
-      zod: 3.25.73
-      zod-to-json-schema: 3.24.6(zod@3.25.73)
+      zod: 3.25.74
+      zod-to-json-schema: 3.24.6(zod@3.25.74)
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -4138,8 +4138,8 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod-to-json-schema@3.24.6(zod@3.25.73):
+  zod-to-json-schema@3.24.6(zod@3.25.74):
     dependencies:
-      zod: 3.25.73
+      zod: 3.25.74
 
-  zod@3.25.73: {}
+  zod@3.25.74: {}

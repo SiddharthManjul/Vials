@@ -1,6 +1,7 @@
-// app/api/fetch-nfts/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { fetchNFTInteractions } from "../../indexing/indexing";
+
+// Tell Next.js to use the Node.js runtime instead of the Edge
+export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
   const address = req.nextUrl.searchParams.get("address");
@@ -10,10 +11,12 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    // Dynamic import to avoid build-time issues with native dependencies
+    const { fetchNFTInteractions } = await import("../../indexing/indexing");
     const result = await fetchNFTInteractions(address.toLowerCase());
     return NextResponse.json(result);
   } catch (err) {
-    console.error(err);
+    console.error("Error in fetch-nfts API:", err);
     return NextResponse.json({ error: "Failed to fetch NFT data" }, { status: 500 });
   }
 }
