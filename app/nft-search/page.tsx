@@ -2,11 +2,25 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from 'react';
-import { Search, Wallet, Image, ExternalLink, Clock, Hash, ArrowUpRight, ArrowDownLeft, Loader2, AlertCircle, TrendingUp } from 'lucide-react';
+
+"use client";
+import React, { useState } from "react";
+import {
+  Search,
+  Wallet,
+  Image,
+  ExternalLink,
+  Clock,
+  Hash,
+  ArrowUpRight,
+  ArrowDownLeft,
+  Loader2,
+  AlertCircle,
+  TrendingUp,
+} from "lucide-react";
 
 const NFTExplorer = () => {
-  const [address, setAddress] = useState('');
+  const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   type NFTData = {
     address: string;
@@ -23,24 +37,24 @@ const NFTExplorer = () => {
   };
 
   const [data, setData] = useState<NFTData | null>(null);
-  const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('overview');
+  const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState("overview");
 
   const fetchNFTData = async () => {
     if (!address || !/^0x[a-fA-F0-9]{40}$/i.test(address)) {
-      setError('Please enter a valid Ethereum address');
+      setError("Please enter a valid Ethereum address");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
     setData(null);
 
     try {
-      const response = await fetch('/api/blockchain-data', {
-        method: 'POST',
+      const response = await fetch("/api/blockchain-data", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ address }),
       });
@@ -53,9 +67,9 @@ const NFTExplorer = () => {
       setData(result);
     } catch (err) {
       setError(
-        err && typeof err === 'object' && 'message' in err
+        err && typeof err === "object" && "message" in err
           ? (err as { message: string }).message
-          : 'Failed to fetch NFT data'
+          : "Failed to fetch NFT data"
       );
     } finally {
       setLoading(false);
@@ -73,12 +87,12 @@ const NFTExplorer = () => {
   };
 
   const formatAddress = (addr: string | any[]) => {
-    if (!addr) return '';
+    if (!addr) return "";
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
 
   const formatTimestamp = (timestamp: number) => {
-    if (!timestamp) return 'Unknown';
+    if (!timestamp) return "Unknown";
     return new Date(timestamp * 1000).toLocaleString();
   };
 
@@ -101,65 +115,70 @@ const NFTExplorer = () => {
     <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
       <div className="aspect-square bg-gradient-to-br from-purple-100 to-blue-100 relative">
         {nft.metadata?.image ? (
-          <img 
-            src={nft.metadata.image.startsWith('ipfs://') 
-              ? nft.metadata.image.replace('ipfs://', 'https://ipfs.io/ipfs/')
-              : nft.metadata.image
+          <img
+            src={
+              nft.metadata.image.startsWith("ipfs://")
+                ? nft.metadata.image.replace("ipfs://", "https://ipfs.io/ipfs/")
+                : nft.metadata.image
             }
             alt={nft.metadata?.name || `Token ${nft.tokenId}`}
             className="w-full h-full object-cover"
             onError={(e) => {
               const img = e.target as HTMLImageElement;
-              img.style.display = 'none';
+              img.style.display = "none";
               if (img.nextSibling && img.nextSibling instanceof HTMLElement) {
-                (img.nextSibling as HTMLElement).style.display = 'flex';
+                (img.nextSibling as HTMLElement).style.display = "flex";
               }
             }}
           />
         ) : null}
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-100 to-blue-100" 
-             style={{display: nft.metadata?.image ? 'none' : 'flex'}}>
+        <div
+          className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-100 to-blue-100"
+          style={{ display: nft.metadata?.image ? "none" : "flex" }}
+        >
           <Image className="w-16 h-16 text-gray-400" />
         </div>
         <div className="absolute top-2 right-2">
-          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-            nft.tokenType === 'ERC-721' 
-              ? 'bg-blue-100 text-blue-800' 
-              : 'bg-purple-100 text-purple-800'
-          }`}>
+          <span
+            className={`px-2 py-1 text-xs font-medium rounded-full ${
+              nft.tokenType === "ERC-721"
+                ? "bg-blue-100 text-blue-800"
+                : "bg-purple-100 text-purple-800"
+            }`}
+          >
             {nft.tokenType}
           </span>
         </div>
       </div>
-      
+
       <div className="p-4">
         <h3 className="font-bold text-lg mb-2 truncate">
           {nft.metadata?.name || `Token #${nft.tokenId}`}
         </h3>
-        
+
         <div className="space-y-2 text-sm text-gray-600">
           <div className="flex items-center gap-2">
             <Hash className="w-4 h-4" />
             <span>ID: {nft.tokenId}</span>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Wallet className="w-4 h-4" />
             <span>{formatAddress(nft.contractAddress)}</span>
           </div>
-          
+
           {nft.amount && (
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
               <span>Amount: {nft.amount}</span>
             </div>
           )}
-          
+
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4" />
             <span>{formatTimestamp(nft.timestamp)}</span>
           </div>
-          
+
           <div className="flex items-center gap-2">
             {nft.from.toLowerCase() === address.toLowerCase() ? (
               <ArrowUpRight className="w-4 h-4 text-red-500" />
@@ -167,19 +186,21 @@ const NFTExplorer = () => {
               <ArrowDownLeft className="w-4 h-4 text-green-500" />
             )}
             <span>
-              {nft.from.toLowerCase() === address.toLowerCase() ? 'Sent' : 'Received'}
+              {nft.from.toLowerCase() === address.toLowerCase()
+                ? "Sent"
+                : "Received"}
             </span>
           </div>
         </div>
-        
+
         {nft.metadata?.description && (
           <p className="mt-3 text-sm text-gray-700 line-clamp-3">
             {nft.metadata.description}
           </p>
         )}
-        
+
         {nft.transactionHash && (
-          <a 
+          <a
             href={`https://monad-testnet.blockscout.com/tx/${nft.transactionHash}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -203,7 +224,7 @@ const NFTExplorer = () => {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="font-semibold text-lg">
-            {collection.name || 'Unknown Collection'}
+            {collection.name || "Unknown Collection"}
           </h3>
           <p className="text-sm text-gray-600">
             {formatAddress(collection.contractAddress)}
@@ -241,6 +262,7 @@ const NFTExplorer = () => {
                 type="text"
                 placeholder="Enter wallet address (0x...)"
                 value={address}
+                onChange={(e) => setAddress(e.target.value)} // <-- Add this line
                 className="w-full pl-10 pr-24 py-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none text-lg"
               />
               <button
@@ -254,7 +276,7 @@ const NFTExplorer = () => {
                     Searching...
                   </>
                 ) : (
-                  'Search'
+                  "Search"
                 )}
               </button>
             </div>
@@ -287,7 +309,7 @@ const NFTExplorer = () => {
                   <Image className="w-8 h-8 text-blue-500" />
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-xl shadow-lg p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -299,7 +321,7 @@ const NFTExplorer = () => {
                   <Wallet className="w-8 h-8 text-purple-500" />
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-xl shadow-lg p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -311,13 +333,15 @@ const NFTExplorer = () => {
                   <Hash className="w-8 h-8 text-green-500" />
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-xl shadow-lg p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-600">ETH Volume</p>
                     <p className="text-2xl font-bold text-indigo-600">
-                      {parseFloat(data.summary?.totalEthVolumeIn || '0').toFixed(2)}
+                      {parseFloat(
+                        data.summary?.totalEthVolumeIn || "0"
+                      ).toFixed(2)}
                     </p>
                   </div>
                   <TrendingUp className="w-8 h-8 text-indigo-500" />
@@ -327,14 +351,14 @@ const NFTExplorer = () => {
 
             {/* Navigation Tabs */}
             <div className="flex space-x-1 mb-8 bg-white p-1 rounded-lg shadow-md">
-              {['overview', 'nfts', 'collections'].map((tab) => (
+              {["overview", "nfts", "collections"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`px-6 py-3 rounded-md font-medium capitalize transition-colors ${
                     activeTab === tab
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'text-gray-600 hover:text-blue-600'
+                      ? "bg-blue-600 text-white shadow-md"
+                      : "text-gray-600 hover:text-blue-600"
                   }`}
                 >
                   {tab}
@@ -344,7 +368,7 @@ const NFTExplorer = () => {
 
             {/* Tab Content */}
             <div className="space-y-6">
-              {activeTab === 'overview' && (
+              {activeTab === "overview" && (
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <h2 className="text-2xl font-bold mb-4">Account Overview</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -354,21 +378,27 @@ const NFTExplorer = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold mb-2">Gas Paid</h3>
-                      <p className="text-gray-600">{data.summary?.totalGasPaidFormatted || '0'} MON</p>
+                      <p className="text-gray-600">
+                        {data.summary?.totalGasPaidFormatted || "0"} MON
+                      </p>
                     </div>
                     <div>
                       <h3 className="font-semibold mb-2">ETH In</h3>
-                      <p className="text-gray-600">{data.summary?.totalEthVolumeIn || '0'} MON</p>
+                      <p className="text-gray-600">
+                        {data.summary?.totalEthVolumeIn || "0"} MON
+                      </p>
                     </div>
                     <div>
                       <h3 className="font-semibold mb-2">ETH Out</h3>
-                      <p className="text-gray-600">{data.summary?.totalEthVolumeOut || '0'} MON</p>
+                      <p className="text-gray-600">
+                        {data.summary?.totalEthVolumeOut || "0"} MON
+                      </p>
                     </div>
                   </div>
                 </div>
               )}
 
-              {activeTab === 'nfts' && (
+              {activeTab === "nfts" && (
                 <div>
                   <h2 className="text-2xl font-bold mb-6">NFT Transfers</h2>
                   {data.nftTransfers && data.nftTransfers.length > 0 ? (
@@ -386,7 +416,7 @@ const NFTExplorer = () => {
                 </div>
               )}
 
-              {activeTab === 'collections' && (
+              {activeTab === "collections" && (
                 <div>
                   <h2 className="text-2xl font-bold mb-6">NFT Collections</h2>
                   {data.nftCollections && data.nftCollections.length > 0 ? (
