@@ -1,4 +1,6 @@
 // app/indexing/indexing.ts
+import '../../lib/hypersync'; // Ensure this runs server-side only
+
 import {
   HypersyncClient,
   Decoder,

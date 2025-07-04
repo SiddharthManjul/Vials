@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Tell Next.js to use the Node.js runtime instead of the Edge
+// Tell Next.js to use the Node.js runtime (required for native dependencies)
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
@@ -11,12 +11,22 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Dynamic import to avoid build-time issues with native dependencies
+    // Dynamic import to ensure server-side only execution
     const { fetchNFTInteractions } = await import("../../indexing/indexing");
     const result = await fetchNFTInteractions(address.toLowerCase());
     return NextResponse.json(result);
   } catch (err) {
     console.error("Error in fetch-nfts API:", err);
+    
+    // More specific error handling
+    if (err instanceof Error) {
+      if (err.message.includes('hypersync') || err.message.includes('native')) {
+        return NextResponse.json({ 
+          error: "Server configuration error with native dependencies" 
+        }, { status: 500 });
+      }
+    }
+    
     return NextResponse.json({ error: "Failed to fetch NFT data" }, { status: 500 });
   }
 }
