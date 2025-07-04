@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       '@envio-dev/hypersync-client':
-        specifier: ^0.6.3
+        specifier: ^0.6.5
         version: 0.6.5
       '@google/genai':
         specifier: ^1.8.0

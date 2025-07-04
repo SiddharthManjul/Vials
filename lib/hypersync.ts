@@ -8,13 +8,15 @@ import {
   TraceField,
   LogField,
   Query,
-} from "@envio-dev/hypersync-client";
+} from "@envio-dev/hypersync-client"; // Adjust import based on your environment
 import {
   formatGwei,
   formatEther,
   decodeAbiParameters,
   parseAbiParameters,
 } from "viem";
+
+import fs from "node:fs";
 
 // ERC-721 Transfer event signature: Transfer(address,address,uint256)
 const ERC721_TRANSFER_SIGNATURE =
